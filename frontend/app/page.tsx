@@ -4,27 +4,45 @@ import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import StockHeader from "@/components/StockHeader";
 import PriceChart from "@/components/PriceChart";
-import TechnicalIndicators from "@/components/TechnicalIndicators";
 import FundamentalsCard from "@/components/FundamentalsCard";
-import AgentPipeline from "@/components/AgentPipeline";
+import AgentDashboard from "@/components/AgentDashboard";
 import SignalCard from "@/components/SignalCard";
 
 export interface StockData {
   ticker: string;
   name: string;
+  currency: string;
+  currencySymbol: string;
   price: number;
   change: number;
   changePercent: number;
-  marketCap: number;
-  volume: number;
+  marketCap: number | null;
+  volume: number | null;
   high52: number;
   low52: number;
   pe: number;
   eps: number;
   dividend: number;
   beta: number;
-  sector: string;
-  industry: string;
+  sector: string | null;
+  industry: string | null;
+  // Extra fields
+  previousClose: number;
+  open: number;
+  dayHigh: number;
+  dayLow: number;
+  bookValue: number;
+  priceToBook: number;
+  returnOnEquity: number;
+  debtToEquity: number;
+  grossMargins: number;
+  operatingMargins: number;
+  profitMargins: number;
+  totalRevenue: number | null;
+  totalDebt: number | null;
+  totalCash: number | null;
+  employees: number | null;
+  revenuePerShare: number;
   priceData: { date: string; open: number; high: number; low: number; close: number; volume: number }[];
 }
 
@@ -120,7 +138,7 @@ export default function Home() {
               to see real-time charts, technical indicators, and AI agent insights.
             </p>
             <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              {["AAPL", "NVDA", "RELIANCE.NS", "BTC-USD", "INFY.NS", "TSLA"].map((t) => (
+              {["AAPL", "NVDA", "RELIANCE.NS", "^NSEI", "BTC-USD", "INFY.NS", "TCS.NS", "^BSESN"].map((t) => (
                 <button
                   key={t}
                   onClick={() => fetchData(t)}
@@ -163,18 +181,13 @@ export default function Home() {
             {/* Main chart */}
             <PriceChart data={stockData.priceData} indicatorData={indicatorData} />
 
-            {/* Technical indicators */}
-            {indicatorData && (
-              <TechnicalIndicators data={indicatorData} />
-            )}
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Fundamentals */}
               <FundamentalsCard stock={stockData} />
-
-              {/* Agent pipeline */}
-              <AgentPipeline ticker={stockData.ticker} />
             </div>
+
+            {/* AI Agent Analysis */}
+            <AgentDashboard ticker={stockData.ticker} />
           </>
         )}
       </main>

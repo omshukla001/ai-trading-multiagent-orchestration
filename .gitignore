@@ -23,10 +23,14 @@ ENV/
 *~
 .DS_Store
 
-# Environment variables
+# Environment variables (never commit secrets)
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.staging
+# .env.example is intentionally NOT listed here — it should be committed
 
 # Testing
 .pytest_cache/

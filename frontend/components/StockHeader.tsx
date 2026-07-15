@@ -3,6 +3,8 @@ import { StockData } from "@/app/page";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 const PERIODS = [
+  { label: "1D", value: "1d" },
+  { label: "1W", value: "5d" },
   { label: "1M", value: "1mo" },
   { label: "3M", value: "3mo" },
   { label: "6M", value: "6mo" },
@@ -10,15 +12,15 @@ const PERIODS = [
   { label: "2Y", value: "2y" },
 ];
 
-function fmt(n: number) {
+function fmtCap(n: number | null, sym: string) {
   if (!n) return "N/A";
-  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  return `$${n.toLocaleString()}`;
+  if (n >= 1e12) return `${sym}${(n / 1e12).toFixed(2)}T`;
+  if (n >= 1e9)  return `${sym}${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6)  return `${sym}${(n / 1e6).toFixed(2)}M`;
+  return `${sym}${n.toLocaleString()}`;
 }
 
-function fmtVol(n: number) {
+function fmtVol(n: number | null) {
   if (!n) return "N/A";
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
@@ -35,7 +37,8 @@ export default function StockHeader({
   period: string;
   onPeriodChange: (p: string) => void;
 }) {
-  const up = stock.change >= 0;
+  const up  = stock.change >= 0;
+  const sym = stock.currencySymbol ?? "$";
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
@@ -46,11 +49,18 @@ export default function StockHeader({
             <span className="text-xs font-mono bg-blue-600/20 text-blue-400 border border-blue-700/40 px-2 py-0.5 rounded">
               {stock.ticker}
             </span>
-            <span className="text-xs text-gray-500">{stock.sector}</span>
+            {stock.currency && (
+              <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded">
+                {stock.currency}
+              </span>
+            )}
+            {stock.sector && (
+              <span className="text-xs text-gray-500">{stock.sector}</span>
+            )}
           </div>
           <h2 className="text-xl font-bold text-white">{stock.name}</h2>
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-3xl font-bold">${stock.price?.toFixed(2)}</span>
+            <span className="text-3xl font-bold">{sym}{stock.price?.toFixed(2)}</span>
             <div className={`flex items-center gap-1 text-sm font-medium ${up ? "text-green-400" : "text-red-400"}`}>
               {up ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
               {up ? "+" : ""}{stock.change?.toFixed(2)} ({up ? "+" : ""}{stock.changePercent?.toFixed(2)}%)
@@ -59,7 +69,7 @@ export default function StockHeader({
         </div>
 
         {/* Right: period selector */}
-        <div className="flex gap-1">
+        <div className="flex flex-wrap gap-1">
           {PERIODS.map((p) => (
             <button
               key={p.value}
@@ -79,12 +89,12 @@ export default function StockHeader({
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-4 pt-4 border-t border-gray-800">
         {[
-          { label: "Market Cap", value: fmt(stock.marketCap) },
-          { label: "Volume", value: fmtVol(stock.volume) },
-          { label: "52W High", value: `$${stock.high52?.toFixed(2)}` },
-          { label: "52W Low", value: `$${stock.low52?.toFixed(2)}` },
-          { label: "P/E Ratio", value: stock.pe ? stock.pe.toFixed(2) : "N/A" },
-          { label: "Beta", value: stock.beta ? stock.beta.toFixed(2) : "N/A" },
+          { label: "Market Cap", value: fmtCap(stock.marketCap, sym) },
+          { label: "Volume",     value: fmtVol(stock.volume) },
+          { label: "52W High",   value: stock.high52 ? `${sym}${stock.high52.toFixed(2)}` : "N/A" },
+          { label: "52W Low",    value: stock.low52  ? `${sym}${stock.low52.toFixed(2)}`  : "N/A" },
+          { label: "P/E Ratio",  value: stock.pe  ? stock.pe.toFixed(2)  : "N/A" },
+          { label: "Beta",       value: stock.beta ? stock.beta.toFixed(2) : "N/A" },
         ].map((s) => (
           <div key={s.label}>
             <p className="text-xs text-gray-500 mb-0.5">{s.label}</p>
